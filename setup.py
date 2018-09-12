@@ -3,6 +3,8 @@
 
 from setuptools import setup
 
+import versioneer
+
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
@@ -20,7 +22,7 @@ test_requirements = [
 
 setup(
     name='elk',
-    version='0.0.1',
+    version=versioneer.get_version(),
     description="""A Python package for managing and interacting with
 gravitational waveform catalogues.""",
     long_description=readme + '\n\n' + history,
@@ -56,5 +58,6 @@ gravitational waveform catalogues.""",
         'Programming Language :: Python :: 3.5',
     ],
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=test_requirements,
+    cmdclass=versioneer.get_cmdclass()
 )

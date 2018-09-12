@@ -1,0 +1,8 @@
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v1.4.0  # Use the ref you want to point at
+  hooks:
+  - id: trailing-whitespace
+  - id: check-added-large-files
+  - id: flake8
+    exclude: docs/conf.py
+  - id: check-yaml

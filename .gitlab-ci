@@ -1,0 +1,8 @@
+test:
+  script:
+  # Right now all this needs to do is to run the test suite
+  - python setup.py test
+
+# Once things are working a bit better it would be sensible to add a
+# step to build-out the documentation, and to deploy wheels to the
+# warehouse.

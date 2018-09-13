@@ -113,3 +113,28 @@ class NRCatalogue(Catalogue):
             np.array(query_table.index, dtype=int)]
 
         return query_table, query_waveforms
+
+    def distances(self, point, metric=np.ones(7)):
+        """
+        Calculate the distance between a point and each
+        of the waveforms in the catalogue.
+        """
+        point = np.array(point, dtype=np.float)
+
+        parameters = np.array(
+            self.table[["mass_ratio", "spin_1x", "spin_1y", "spin_1z",
+                        "spin_2x", "spin_2y", "spin_2z"]],
+            dtype=np.float
+        )
+        return np.sqrt(np.sum((parameters - point)**2, axis=1))
+
+    def find_closest(self, point):
+        """
+        Find the closest waveform to a given point, and return it.
+        """
+
+        distances = self.distances(point)
+
+        closest = np.argmin(distances)
+
+        return distances[closest], self.waveforms[closest]

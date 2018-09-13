@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
@@ -13,7 +12,10 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.0',
-    # TODO: put package requirements here
+    'numpy',
+    'pandas',
+    'lalsuite',
+    'pycbc'
 ]
 
 test_requirements = [
@@ -42,7 +44,7 @@ gravitational waveform catalogues.""",
     include_package_data=True,
     install_requires=requirements,
     license="MIT license",
-    zip_safe=False,
+    zip_safe=True,
     keywords='elk',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

@@ -176,7 +176,7 @@ class NRCatalogue(Catalogue):
                     # combination
                     ax.scatter(self.table[parameter], self.table[j_parameter])
 
-                if j == len(self.parameters):
+                if j == len(self.parameters) - 1:
                     ax.set_xlabel(parameter)
                 else:
                     ax.set_xticks([])
@@ -187,4 +187,4 @@ class NRCatalogue(Catalogue):
                     ax.set_yticks([])
 
         f.tight_layout()
-        f.savefig("test_corner.png")
+        return f

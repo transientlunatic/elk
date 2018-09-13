@@ -2,6 +2,8 @@ import glob
 import numpy as np
 import pandas as pd
 import h5py
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
 
 from lalsimulation import SimInspiralNRWaveformGetSpinsFromHDF5File as get_spin
 
@@ -56,6 +58,9 @@ class NRCatalogue(Catalogue):
         columns = ["tag", "mass_ratio",
                    "spin_1x", "spin_1y", "spin_1z",
                    "spin_2x", "spin_2y", "spin_2z"]
+
+        self.parameters = ["mass_ratio", "spin_1x", "spin_1y", "spin_1z",
+                           "spin_2x", "spin_2y", "spin_2z"]
 
         df = pd.DataFrame(columns=columns)
 
@@ -122,8 +127,7 @@ class NRCatalogue(Catalogue):
         point = np.array(point, dtype=np.float)
 
         parameters = np.array(
-            self.table[["mass_ratio", "spin_1x", "spin_1y", "spin_1z",
-                        "spin_2x", "spin_2y", "spin_2z"]],
+            self.table[self.parameters],
             dtype=np.float
         )
         return np.sqrt(np.sum((parameters - point)**2, axis=1))
@@ -138,3 +142,49 @@ class NRCatalogue(Catalogue):
         closest = np.argmin(distances)
 
         return distances[closest], self.waveforms[closest]
+
+    def coverage_plot(self, figsize=(9, 9)):
+        """
+        Plot an n-dimensional corner plot to illustrate the
+        parameter space coverage of this catalogue.
+        """
+
+        f = plt.figure(figsize=figsize)
+
+        # produce an n x n grid of subplots
+        gs = gridspec.GridSpec(len(self.parameters), len(self.parameters),
+                               wspace=0.0, hspace=0.0)
+
+        for i, parameter in enumerate(self.parameters):
+            for j, j_parameter in enumerate(self.parameters):
+
+                if i > j:
+                    # Don't produce a plot for combinations above the
+                    # diagonal.
+                    continue
+                else:
+                    # Produce a subplot for combinations on or below
+                    # the diagonal
+                    ax = plt.subplot(gs[j, i])
+
+                if i == j:
+                    # This is the on-diagonal case, which we'll just skip for
+                    # now. Ideally will want to insert a histogram here.
+                    ax.hist(self.table[parameter])
+                else:
+                    # Produce a scatter plot of the waveforms for this
+                    # combination
+                    ax.scatter(self.table[parameter], self.table[j_parameter])
+
+                if j == len(self.parameters):
+                    ax.set_xlabel(parameter)
+                else:
+                    ax.set_xticks([])
+
+                if i == 0:
+                    ax.set_ylabel(j_parameter)
+                else:
+                    ax.set_yticks([])
+
+        f.tight_layout()
+        f.savefig("test_corner.png")

@@ -1,4 +1,3 @@
-
 include AUTHORS.rst
 
 include CONTRIBUTING.rst
@@ -13,3 +12,4 @@ recursive-exclude * *.py[co]
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
 include versioneer.py
 include elk/_version.py
+include elk/elk.conf

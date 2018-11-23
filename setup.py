@@ -31,11 +31,8 @@ gravitational waveform catalogues.""",
     author="Daniel Williams",
     author_email='daniel.williams@ligo.org',
     url='https://github.com/transientlunatic/elk',
-    packages=[
-        'elk',
-    ],
-    package_dir={'elk':
-                 'elk'},
+    packages=['elk'],
+    package_dir={'elk': 'elk'},
     entry_points={
         'console_scripts': [
             'elk=elk.cli:main'

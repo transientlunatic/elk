@@ -180,7 +180,7 @@ class NRWaveform(Waveform):
         return -phase_op['fun'], phase_op['x']
 
     def timeseries(self, total_mass, sample_rate=4096,
-                   flow=30, distance=1):
+                   flow=30, distance=1, coa_phase=0):
         """
         Generate the timeseries representation of this waveform.
         """
@@ -198,15 +198,18 @@ class NRWaveform(Waveform):
                                      spin2y=self.spin_2y,
                                      spin2z=self.spin_2z,
                                      distance=distance,
+                                     coa_phase=coa_phase,
                                      delta_t=1.0 / sample_rate,
                                      f_lower=flow,
+                                     inclination=0,
+                                     
                                      numrel_data=self.data_file)
 
             hp = Timeseries(hp)
             hx = Timeseries(hx)
 
             # Recenter the waveforms on the maximum strain
-            hp.times -= hp.times[np.argmax(np.abs(hp.data))]
+            #hp.times -= hp.times[np.argmax(np.abs(hp.data))]
             hx.times -= hx.times[np.argmax(np.abs(hx.data))]
 
             return hp, hx

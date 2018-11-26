@@ -79,8 +79,8 @@ class PPCatalogue(Catalogue):
         hx = Timeseries(hx)
 
         # Recenter the waveforms on the maximum strain
-        hp.times -= hp.times[np.argmax(np.abs(hp.data))]
-        hx.times -= hx.times[np.argmax(np.abs(hx.data))]
+        #hp.times -= hp.times[np.argmax(np.abs(hp.data))]
+        #hx.times -= hx.times[np.argmax(np.abs(hx.data))]
 
         tix = (time_range[0] < hp.times*1e4) & (hp.times*1e4 < time_range[1])
 
@@ -209,13 +209,11 @@ class NRCatalogue(Catalogue):
            A query expression, for example 's1x == 0' to find all
            the waveforms where the s1x component is zero.
         """
-
-        print(expression)
         query_table = self.table.query(expression, inplace=False)
-        print(query_table)
-        query_waveforms = self.waveforms[
-            np.array(query_table.index, dtype=int)]
 
+        tags = query_table
+        query_waveforms = [waveform for waveform in self.waveforms if waveform.tag in list(query_table['tag'])]
+        
         new_cat = NRCatalogue(origin="GeorgiaTech", ftype="hdf5",
                               table=query_table,
                               waveforms=query_waveforms)
@@ -284,15 +282,18 @@ class NRCatalogue(Catalogue):
                     # Produce a subplot for combinations on or below
                     # the diagonal
                     ax = plt.subplot(gs[j, i])
+                    ax.grid(None)
 
                 if i == j:
                     # This is the on-diagonal case, which we'll just skip for
                     # now. Ideally will want to insert a histogram here.
-                    ax.hist(self.table[parameter])
+                    ax.hist(self.table[parameter], histtype="step")
+                    ax.yaxis.tick_right()
+                    ax.set_yticks(ax.get_yticks()[1:-1])
                 else:
                     # Produce a scatter plot of the waveforms for this
                     # combination
-                    ax.scatter(self.table[parameter], self.table[j_parameter])
+                    ax.scatter(self.table[parameter], self.table[j_parameter], marker=".")
 
                 if j == len(self.parameters) - 1:
                     ax.set_xlabel(parameter.replace("_", " "))
@@ -301,9 +302,9 @@ class NRCatalogue(Catalogue):
 
                 if i == 0:
                     ax.set_ylabel(j_parameter.replace("_", " "))
-                else:
+                elif not i == j:
                     ax.set_yticks([])
-
+                    
         f.tight_layout()
         return f
 

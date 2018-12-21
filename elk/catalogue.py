@@ -79,8 +79,8 @@ class PPCatalogue(Catalogue):
         hx = Timeseries(hx)
 
         # Recenter the waveforms on the maximum strain
-        #hp.times -= hp.times[np.argmax(np.abs(hp.data))]
-        #hx.times -= hx.times[np.argmax(np.abs(hx.data))]
+        hp.times -= hp.times[np.argmax(np.abs(hp.data))]
+        hx.times -= hx.times[np.argmax(np.abs(hx.data))]
 
         tix = (time_range[0] < hp.times*1e4) & (hp.times*1e4 < time_range[1])
 
@@ -316,7 +316,7 @@ class NRCatalogue(Catalogue):
 
         return np.min(freqs)
 
-    def create_training_data(self, total_mass, fmin=30,
+    def create_training_data(self, total_mass, fmin=30, ma=None,
                              sample_rate=4096, distance=1, tmax=0.005):
         """
         Produce an array of data suitable for use as training data
@@ -350,7 +350,7 @@ class NRCatalogue(Catalogue):
         for waveform in self.waveforms:
             try:
                 hp, hx = waveform.timeseries(total_mass, gen_sample,
-                                             fmin, distance)
+                                             fmin, distance, ma=ma)
             except LalsuiteError:
                 print(
                     "There was an error producing a waveform for {}"

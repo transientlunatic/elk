@@ -52,7 +52,7 @@ class PPCatalogue(Catalogue):
         self.total_mass = total_mass
         self.fmin = fmin
 
-    def waveform(self, p, time_range, distance=1.0, coa_phase=0):
+    def waveform(self, p, time_range, distance=1.0, coa_phase=0, t0=0):
         """
         Generate a single waveform from the catalogue.
         """
@@ -79,8 +79,11 @@ class PPCatalogue(Catalogue):
         hx = Timeseries(hx)
 
         # Recenter the waveforms on the maximum strain
-        #hp.times -= hp.times[np.argmax(np.abs(hp.data))]
-        #hx.times -= hx.times[np.argmax(np.abs(hx.data))]
+        hp.times -= hp.times[np.argmax(np.abs(hp.data))]
+        hx.times -= hx.times[np.argmax(np.abs(hx.data))]
+
+        hp.times -= t0
+        hx.times -= t0
 
         tix = (time_range[0] < hp.times*1e4) & (hp.times*1e4 < time_range[1])
 
@@ -210,10 +213,10 @@ class NRCatalogue(Catalogue):
            the waveforms where the s1x component is zero.
         """
         query_table = self.table.query(expression, inplace=False)
+        query_waveforms = [waveform for waveform
+                           in self.waveforms if waveform.tag
+                           in list(query_table['tag'])]
 
-        tags = query_table
-        query_waveforms = [waveform for waveform in self.waveforms if waveform.tag in list(query_table['tag'])]
-        
         new_cat = NRCatalogue(origin="GeorgiaTech", ftype="hdf5",
                               table=query_table,
                               waveforms=query_waveforms)
@@ -293,7 +296,9 @@ class NRCatalogue(Catalogue):
                 else:
                     # Produce a scatter plot of the waveforms for this
                     # combination
-                    ax.scatter(self.table[parameter], self.table[j_parameter], marker=".")
+                    ax.scatter(self.table[parameter],
+                               self.table[j_parameter],
+                               marker=".")
 
                 if j == len(self.parameters) - 1:
                     ax.set_xlabel(parameter.replace("_", " "))
@@ -304,7 +309,7 @@ class NRCatalogue(Catalogue):
                     ax.set_ylabel(j_parameter.replace("_", " "))
                 elif not i == j:
                     ax.set_yticks([])
-                    
+
         f.tight_layout()
         return f
 

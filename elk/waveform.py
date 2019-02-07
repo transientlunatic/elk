@@ -186,12 +186,12 @@ class NRWaveform(Waveform):
         """
 
         if not f_low:
-            f_low = self.minimum_frequency()
+            f_low = self.minimum_frequency(total_mass)
         if not f_ref:
-            f_ref = flow
+            f_ref = f_low
         
         mass1, mass2 = components_from_total(total_mass, self.mass_ratio)
-
+        
         try:
             hp, hx = get_td_waveform(approximant="NR_hdf5",
                                      mass1=mass1,

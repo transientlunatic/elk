@@ -171,6 +171,7 @@ class NRCatalogue(Catalogue):
             except KeyError:
                 print("Problem with waveform {}".format(nrfile))
 
+                
             Mflower = data.attrs['f_lower_at_1MSUN']
             mass_ratio = -(2*eta + np.sqrt(1-4*eta) - 1) / (2*eta)
 
@@ -323,7 +324,7 @@ class NRCatalogue(Catalogue):
 
         return np.min(freqs)
 
-    def create_training_data(self, total_mass, fmin=30, ma=None,
+    def create_training_data(self, total_mass, f_min=None, ma=None,
                              sample_rate=4096, distance=1, tmax=0.005, tmin=-0.010):
         """
         Produce an array of data suitable for use as training data
@@ -334,9 +335,10 @@ class NRCatalogue(Catalogue):
         total_mass : float
            The total mass, in solar masses, at which the
            waveforms should be produced.
-        fmin : float
-           The minimum frequency whcih should be included
-           in the wavefom.
+        f_min : float
+           The minimum frequency which should be included
+           in the wavefom. By default this is the minimum frequency 
+           as calculated from the waveform metadata.
         sample_rate : float
            The sample rate at which the data should be generated.
         distance : float
@@ -357,14 +359,14 @@ class NRCatalogue(Catalogue):
         for waveform in self.waveforms:
             try:
                 hp, hx = waveform.timeseries(total_mass, gen_sample,
-                                             fmin, distance, ma=ma)
+                                             f_min, distance, ma=ma)
             except LalsuiteError:
                 print(
                     "There was an error producing a waveform for {}"
                     .format(waveform.tag))
                 continue
 
-            hp.times -= hp.times[np.argmax(hp.times)]
+            #hp.times -= hp.times[np.argmax(hp.times)]
             ixs = hp.times < tmax
 
             export = np.ones((len(hp.data[ixs][::skip]), 10))

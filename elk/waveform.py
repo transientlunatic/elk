@@ -158,7 +158,7 @@ class NRWaveform(Waveform):
 
     def minimum_frequency(self, total_mass):
 
-        return self.Mflower * total_mass
+        return self.Mflower / total_mass
 
     def _match(self, x, y, sample_f=1024, fmin=30, phase=0):
         top = inner_product(x, y, sample_f, phase=phase)
@@ -180,11 +180,16 @@ class NRWaveform(Waveform):
         return -phase_op['fun'], phase_op['x']
 
     def timeseries(self, total_mass, sample_rate=4096,
-                   flow=30, distance=1, coa_phase=0):
+                   f_low=None, distance=1, coa_phase=0, ma=None, f_ref=None, t_align=True):
         """
         Generate the timeseries representation of this waveform.
         """
 
+        if not f_low:
+            f_low = self.minimum_frequency()
+        if not f_ref:
+            f_ref = flow
+        
         mass1, mass2 = components_from_total(total_mass, self.mass_ratio)
 
         try:
@@ -200,18 +205,19 @@ class NRWaveform(Waveform):
                                      distance=distance,
                                      coa_phase=coa_phase,
                                      delta_t=1.0 / sample_rate,
-                                     f_lower=flow,
+                                     f_lower=f_low,
                                      inclination=0,
-                                     
+                                     ma = ma,
+                                     f_ref=f_ref,
                                      numrel_data=self.data_file)
 
             hp = Timeseries(hp)
             hx = Timeseries(hx)
 
-            # Recenter the waveforms on the maximum strain
-            #hp.times -= hp.times[np.argmax(np.abs(hp.data))]
-            hx.times -= hx.times[np.argmax(np.abs(hx.data))]
-
+            if t_align:
+                # Recenter the waveforms on the maximum strain
+                hp.times -= hp.times[np.argmax(np.abs(hp.data - 1j * hx.data))]
+                hx.times -= hx.times[np.argmax(np.abs(hp.data - 1j * hx.data))]
             return hp, hx
 
         except RuntimeError:

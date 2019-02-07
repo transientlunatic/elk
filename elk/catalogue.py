@@ -52,7 +52,7 @@ class PPCatalogue(Catalogue):
         self.total_mass = total_mass
         self.fmin = fmin
 
-    def waveform(self, p, time_range, distance=1.0, coa_phase=0):
+    def waveform(self, p, time_range, distance=1.0, coa_phase=0, t0=0, f_ref=100):
         """
         Generate a single waveform from the catalogue.
         """
@@ -73,14 +73,19 @@ class PPCatalogue(Catalogue):
                                  distance=distance,
                                  delta_t=delta_t/1e4,
                                  coa_phase=coa_phase,
+                                 f_ref=f_ref,
                                  f_lower=self.fmin)
 
         hp = Timeseries(hp)
         hx = Timeseries(hx)
-
+        
         # Recenter the waveforms on the maximum strain
-        hp.times -= hp.times[np.argmax(np.abs(hp.data))]
-        hx.times -= hx.times[np.argmax(np.abs(hx.data))]
+        hp.times -= hp.times[np.argmax(np.abs(hp.data - 1j * hx.data))]
+        hx.times -= hx.times[np.argmax(np.abs(hp.data - 1j * hx.data))]
+
+        # Recenter the waveforms now to some arbitrary time 
+        hp.times -= t0
+        hx.times -= t0
 
         tix = (time_range[0] < hp.times*1e4) & (hp.times*1e4 < time_range[1])
 
@@ -210,10 +215,10 @@ class NRCatalogue(Catalogue):
            the waveforms where the s1x component is zero.
         """
         query_table = self.table.query(expression, inplace=False)
+        query_waveforms = [waveform for waveform
+                           in self.waveforms if waveform.tag
+                           in list(query_table['tag'])]
 
-        tags = query_table
-        query_waveforms = [waveform for waveform in self.waveforms if waveform.tag in list(query_table['tag'])]
-        
         new_cat = NRCatalogue(origin="GeorgiaTech", ftype="hdf5",
                               table=query_table,
                               waveforms=query_waveforms)
@@ -293,7 +298,9 @@ class NRCatalogue(Catalogue):
                 else:
                     # Produce a scatter plot of the waveforms for this
                     # combination
-                    ax.scatter(self.table[parameter], self.table[j_parameter], marker=".")
+                    ax.scatter(self.table[parameter],
+                               self.table[j_parameter],
+                               marker=".")
 
                 if j == len(self.parameters) - 1:
                     ax.set_xlabel(parameter.replace("_", " "))
@@ -304,7 +311,7 @@ class NRCatalogue(Catalogue):
                     ax.set_ylabel(j_parameter.replace("_", " "))
                 elif not i == j:
                     ax.set_yticks([])
-                    
+
         f.tight_layout()
         return f
 
@@ -317,7 +324,7 @@ class NRCatalogue(Catalogue):
         return np.min(freqs)
 
     def create_training_data(self, total_mass, fmin=30, ma=None,
-                             sample_rate=4096, distance=1, tmax=0.005):
+                             sample_rate=4096, distance=1, tmax=0.005, tmin=-0.010):
         """
         Produce an array of data suitable for use as training data
         using the waveforms in this catalogue.
@@ -357,10 +364,13 @@ class NRCatalogue(Catalogue):
                     .format(waveform.tag))
                 continue
 
+            hp.times -= hp.times[np.argmax(hp.times)]
             ixs = hp.times < tmax
 
             export = np.ones((len(hp.data[ixs][::skip]), 10))
 
+            
+            
             export[:, 0] = hp.times[ixs][::skip]
             export[:, 1] = waveform.mass_ratio
             export[:, [2, 3, 4, 5, 6, 7]] *= waveform.spins

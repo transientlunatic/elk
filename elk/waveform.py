@@ -3,6 +3,7 @@ This module contains code for wrapping lalsuite functionality
 in a more pythonic manner to allow the creation of waveforms.
 """
 
+
 import pycbc.types.timeseries
 from pycbc.waveform import get_td_waveform
 # import lal
@@ -85,6 +86,12 @@ class Timeseries(object):
             self.data = np.array(data)
             self.dt = np.diff(self.times)[0]
         self.df = 1./self.dt
+
+    def pycbc(self):
+        """
+        Return the timeseries as a pycbc timeseries.
+        """
+        return pycbc.types.TimeSeries(self.data, self.dt)
 
     def apply_phase_offset(self,
                            phase,

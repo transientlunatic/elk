@@ -3,6 +3,7 @@ This module contains code for wrapping lalsuite functionality
 in a more pythonic manner to allow the creation of waveforms.
 """
 
+import pycbc.types.timeseries
 from pycbc.waveform import get_td_waveform
 # import lal
 # import lalsimulation as lalsim
@@ -73,7 +74,7 @@ class Timeseries(object):
         Create a Timeseries from a LALSuite timeseries or from data and times.
         """
 
-        if hasattr(data, "sample_times"):
+        if isinstance(data, pycbc.types.timeseries.TimeSeries):
             # This looks like a LALSuite timeseries
             self.dt = np.diff(data.sample_times)[0]
             self.times = np.array(data.sample_times)
@@ -179,8 +180,15 @@ class NRWaveform(Waveform):
 
         return -phase_op['fun'], phase_op['x']
 
-    def timeseries(self, total_mass, sample_rate=4096,
-                   f_low=None, distance=1, coa_phase=0, ma=None, f_ref=None, t_align=True):
+    def timeseries(self,
+                   total_mass,
+                   sample_rate=4096,
+                   f_low=None,
+                   distance=1,
+                   coa_phase=0,
+                   ma=None,
+                   f_ref=None,
+                   t_align=True):
         """
         Generate the timeseries representation of this waveform.
         """
@@ -189,9 +197,9 @@ class NRWaveform(Waveform):
             f_low = self.minimum_frequency(total_mass)
         if not f_ref:
             f_ref = f_low
-        
+
         mass1, mass2 = components_from_total(total_mass, self.mass_ratio)
-        
+
         try:
             hp, hx = get_td_waveform(approximant="NR_hdf5",
                                      mass1=mass1,
@@ -207,10 +215,9 @@ class NRWaveform(Waveform):
                                      delta_t=1.0 / sample_rate,
                                      f_lower=f_low,
                                      inclination=0,
-                                     ma = ma,
+                                     ma=ma,
                                      f_ref=f_ref,
                                      numrel_data=self.data_file)
-
             hp = Timeseries(hp)
             hx = Timeseries(hx)
 

@@ -328,7 +328,7 @@ class NRCatalogue(Catalogue):
 
         return distances[closest], self.waveforms[closest]
 
-    def coverage_plot(self, figsize=(9, 9)):
+    def coverage_plot(self, figsize=(9, 9), additional=[]):
         """
         Plot an n-dimensional corner plot to illustrate the
         parameter space coverage of this catalogue.
@@ -337,6 +337,8 @@ class NRCatalogue(Catalogue):
         ----------
         figsize : tuple
            The size of the figure to be produced.
+        additional : list
+           A list of additional points to be added to the plot.
 
         Returns
         -------
@@ -344,12 +346,32 @@ class NRCatalogue(Catalogue):
            The figure object containing the corner plot.
         """
 
+        lato = {'family': 'Lato',
+                'color':  'black',
+                'weight': 'light',
+                'size': 10,
+        }
+        
         f = plt.figure(figsize=figsize)
+
+        if not isinstance(additional, pd.DataFrame):
+            # Convert additional to an array
+            additional = pd.DataFrame(additional)
 
         # produce an n x n grid of subplots
         gs = gridspec.GridSpec(len(self.parameters), len(self.parameters),
                                wspace=0.0, hspace=0.0)
 
+
+        # Make a legend for the additional points
+        legend_ax = plt.subplot(gs[1,3])
+        legend_ax.axis("off")
+        legend_ax.grid(None)
+        for i, point in enumerate(additional.iterrows()):
+             legend_ax.scatter(0, i, marker="o", c=point[1]['color'], alpha=0.7)
+             legend_ax.text(0.02, i, point[1]['label'], ha="left", va="center", fontdict=lato)
+        legend_ax.set_xlim([-0.05, 0.3])
+             
         for i, parameter in enumerate(self.parameters):
             for j, j_parameter in enumerate(self.parameters):
 
@@ -370,12 +392,16 @@ class NRCatalogue(Catalogue):
                     ax.yaxis.tick_right()
                     ax.set_yticks(ax.get_yticks()[1:-1])
                 else:
+                    
+                    # Add in the 'additional' points
+                    ax.scatter(additional[parameter], additional[j_parameter], marker="o", c=additional['color'], alpha=0.7)
+
+
                     # Produce a scatter plot of the waveforms for this
                     # combination
                     ax.scatter(self.table[parameter],
                                self.table[j_parameter],
                                marker=".")
-
                 if j == len(self.parameters) - 1:
                     ax.set_xlabel(parameter.replace("_", " "))
                 else:

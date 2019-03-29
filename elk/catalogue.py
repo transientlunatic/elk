@@ -37,7 +37,7 @@ class PPCatalogue(Catalogue):
     solMass = 1.988e30  # kg
     parsec = 3.0857e16  # m
 
-    def __init__(self, approximant, total_mass=20, fmin=30.):
+    def __init__(self, approximant, total_mass=20, fmin=30., waveforms=[]):
         """
         Assemble the catalogue.
 
@@ -52,6 +52,85 @@ class PPCatalogue(Catalogue):
         self.total_mass = total_mass
         self.fmin = fmin
 
+        self.waveforms = waveforms
+
+        self.parameters = ["mass_ratio", "spin_1x", "spin_1y", "spin_1z",
+                           "spin_2x", "spin_2y", "spin_2z"]
+
+        self.data_parameters = {0: "time",
+                                1: "mass ratio",
+                                2: "spin 1x",
+                                3: "spin 1y",
+                                4: "spin 1z",
+                                5: "spin 2x",
+                                6: "spin 2y",
+                                7: "spin 2z",
+                                8: "h+",
+                                9: "hx"}
+        self.c_ind = {j: i for i, j in self.data_parameters.items()}
+        
+    def create_training_data(self, total_mass, f_min=None, ma=None,
+                             sample_rate=4096., distance=1, tmax=0.005, tmin=-0.010):
+        """
+        Produce an array of data suitable for use as training data
+        using the waveforms in this catalogue.
+
+        Parameters
+        ----------
+        total_mass : float
+           The total mass, in solar masses, at which the
+           waveforms should be produced.
+        f_min : float
+           The minimum frequency which should be included
+           in the wavefom. By default this is the minimum frequency 
+           as calculated from the waveform metadata.
+        sample_rate : float
+           The sample rate at which the data should be generated.
+        distance : float
+           The distance, in megaparsecs, at which the source should
+           be located compared to the observer.
+
+        Returns
+        -------
+        training_data : `numpy.ndarray`
+           An array of the training data, with the appropriate
+           'y' values in the final columns.
+        """
+
+        big_export = np.zeros((1, 10))
+
+        gen_sample = 4096
+        skip = int(gen_sample/sample_rate)  # this is nasty
+        time_range = [1e4*tmin, 1e4*tmax, (tmax-tmin)*sample_rate]
+        for waveform_p in self.waveforms:
+            try:
+                hp, hx = self.waveform(waveform_p, time_range)
+                #hp, hx = waveform.timeseries(total_mass, gen_sample,
+                #                             f_min, distance, ma=ma)
+            except LalsuiteError:
+                print(
+                    "There was an error producing a waveform for {}"
+                    .format(waveform.tag))
+                continue
+
+            #hp.times -= hp.times[np.argmax(hp.times)]
+            ixs = hp.times < tmax
+
+            export = np.ones((len(hp.data[ixs][::skip]), 10))
+
+            
+            
+            export[:, 0] = hp.times[ixs][::skip]
+            export[:, 1] = waveform_p['mass ratio']
+            # TODO Fix this
+            #export[:, [2, 3, 4, 5, 6, 7]] *= waveform_p['spin 1x']
+            export[:, 8] = hp.data[ixs][::skip]
+            export[:, 9] = hx.data[ixs][::skip]
+
+            big_export = np.vstack([big_export, export])
+
+        return big_export[1:, :]
+        
     def waveform(self, p, time_range, distance=1.0, coa_phase=0, t0=0, f_ref=100):
         """
         Generate a single waveform from the catalogue.
@@ -98,78 +177,6 @@ class PPCatalogue(Catalogue):
 
 
 
-    def create_training_data(self,
-                             total_mass,
-                             sampling="factorial",
-                             sample_space = {"mass ratio": [0, 4, 0.5]},
-                             f_min=None,
-                             ma=None,
-                             sample_rate=4096,
-                             distance=1,
-                             tmax=0.005, tmin=-0.010):
-        """
-        Produce an array of data suitable for use as training data
-        using the waveforms in this catalogue.
-
-        Parameters
-        ----------
-        total_mass : float
-           The total mass, in solar masses, at which the
-           waveforms should be produced.
-        f_min : float
-           The minimum frequency which should be included
-           in the wavefom. By default this is the minimum frequency 
-           as calculated from the waveform metadata.
-        sample_rate : float
-           The sample rate at which the data should be generated.
-        distance : float
-           The distance, in megaparsecs, at which the source should
-           be located compared to the observer.
-
-        Returns
-        -------
-        training_data : `numpy.ndarray`
-           An array of the training data, with the appropriate
-           'y' values in the final columns.
-        """
-
-        big_export = np.zeros((1, 10))
-
-        gen_sample = 4096
-        skip = int(gen_sample/sample_rate)  # this is nasty
-
-        # Unlike in NR catalogues where there are a defined number of waveforms available,
-        # we need to construct a set of locations
-        
-        for waveform in self.waveforms:
-            try:
-                hp, hx = waveform.timeseries(total_mass, gen_sample,
-                                             f_min, distance, ma=ma)
-            except LalsuiteError:
-                print(
-                    "There was an error producing a waveform for {}"
-                    .format(waveform.tag))
-                continue
-
-            #hp.times -= hp.times[np.argmax(hp.times)]
-            ixs = hp.times < tmax
-
-            export = np.ones((len(hp.data[ixs][::skip]), 10))
-
-            
-            
-            export[:, 0] = hp.times[ixs][::skip]
-            export[:, 1] = waveform.mass_ratio
-            export[:, [2, 3, 4, 5, 6, 7]] *= waveform.spins
-            export[:, 8] = hp.data[ixs][::skip]
-            export[:, 9] = hx.data[ixs][::skip]
-
-            big_export = np.vstack([big_export, export])
-
-        return big_export[1:, :]
-
-
-
 class NRCatalogue(Catalogue):
     """
     This class represents an NR waveform catalogue.
@@ -191,6 +198,7 @@ class NRCatalogue(Catalogue):
            The file type containing the waveforms.
         """
 
+        self.origin = origin
         if ftype == "hdf5":
             self.file_suffix = "h5"
         else:
@@ -288,14 +296,16 @@ class NRCatalogue(Catalogue):
            A query expression, for example 's1x == 0' to find all
            the waveforms where the s1x component is zero.
         """
-        query_table = self.table.query(expression, inplace=False)
-        query_waveforms = [waveform for waveform
+        query_table = self.table.query(expression)
+        
+        query_waveforms = np.array([waveform for waveform
                            in self.waveforms if waveform.tag
-                           in list(query_table['tag'])]
+                           in query_table.tag.values])
 
-        new_cat = NRCatalogue(origin="GeorgiaTech", ftype="hdf5",
+        new_cat = NRCatalogue(origin=self.origin, ftype="hdf5",
                               table=query_table,
                               waveforms=query_waveforms)
+
         return new_cat
 
     def distances(self, point, metric=np.ones(7)):

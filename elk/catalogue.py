@@ -123,7 +123,8 @@ class PPCatalogue(Catalogue):
             export[:, 0] = hp.times[ixs][::skip]
             export[:, 1] = waveform_p['mass ratio']
             # TODO Fix this
-            #export[:, [2, 3, 4, 5, 6, 7]] *= waveform_p['spin 1x']
+            export[:, 4] *= waveform_p['spin 1z']
+            export[:, 7] *= waveform_p['spin 2z']
             export[:, 8] = hp.data[ixs][::skip]
             export[:, 9] = hx.data[ixs][::skip]
 
@@ -140,6 +141,9 @@ class PPCatalogue(Catalogue):
         mass1, mass2 = self.components_from_total(self.total_mass,
                                                   p['mass ratio'])
 
+        for par in self.parameters:
+            if not par.replace("_", " ") in p: p[par.replace("_", " ")] = 0
+        
         hp, hx = get_td_waveform(approximant=self.approximant,
                                  mass1=mass1,
                                  mass2=mass2,

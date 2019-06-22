@@ -70,9 +70,20 @@ class Timeseries(object):
     Python-friendly manner.
     """
 
-    def __init__(self, data, times=None):
+    def __init__(self, data, times=None, variance=None):
         """
         Create a Timeseries from a LALSuite timeseries or from data and times.
+
+        Optionally, a variance timeseries can be provided.
+
+        Parameters
+        ----------
+        data : {array-like, pycbc timeseries}
+           An array of data points.
+        variance : array-like (optional)
+           An array of variances.
+        times : array-like 
+           An array of timestamps
         """
 
         if isinstance(data, pycbc.types.timeseries.TimeSeries):
@@ -85,6 +96,10 @@ class Timeseries(object):
             self.times = np.array(times)
             self.data = np.array(data)
             self.dt = np.diff(self.times)[0]
+
+        if isinstance(variance, np.ndarray):
+            self.variance = variance
+            
         self.df = 1./self.dt
 
     def pycbc(self):
@@ -194,6 +209,8 @@ class NRWaveform(Waveform):
                    distance=1,
                    coa_phase=0,
                    ma=None,
+                   t_min=None,
+                   t_max=None,
                    f_ref=None,
                    t_align=True):
         """
@@ -232,6 +249,13 @@ class NRWaveform(Waveform):
                 # Recenter the waveforms on the maximum strain
                 hp.times -= hp.times[np.argmax(np.abs(hp.data - 1j * hx.data))]
                 hx.times -= hx.times[np.argmax(np.abs(hp.data - 1j * hx.data))]
+            if t_min:
+                hp.data, hp.times = hp.data[hp.times > t_min], hp.times[hp.times > t_min]
+                hx.data, hx.times = hx.data[hx.times > t_min], hx.times[hx.times > t_min]
+            if t_max:
+                hp.data, hp.times = hp.data[hp.times < t_max], hp.times[hp.times < t_max]
+                hx.data, hx.times = hx.data[hx.times < t_max], hx.times[hx.times < t_max]
+                
             return hp, hx
 
         except RuntimeError:

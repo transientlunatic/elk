@@ -101,7 +101,7 @@ class PPCatalogue(Catalogue):
 
         gen_sample = 4096
         skip = int(gen_sample/sample_rate)  # this is nasty
-        time_range = [1e4*tmin, 1e4*tmax, (tmax-tmin)*sample_rate]
+        time_range = [tmin, tmax, (tmax-tmin)*sample_rate]
         for waveform_p in self.waveforms:
             try:
                 hp, hx = self.waveform(waveform_p, time_range)
@@ -114,7 +114,7 @@ class PPCatalogue(Catalogue):
                 continue
 
             #hp.times -= hp.times[np.argmax(hp.times)]
-            ixs = hp.times < tmax
+            ixs = (hp.times < tmax) & (hp.times > tmin)
 
             export = np.ones((len(hp.data[ixs][::skip]), 10))
 
@@ -154,7 +154,7 @@ class PPCatalogue(Catalogue):
                                  spin2y=p['spin 2y'],
                                  spin2z=p['spin 2z'],
                                  distance=distance,
-                                 delta_t=delta_t/1e4,
+                                 delta_t=delta_t,
                                  coa_phase=coa_phase,
                                  f_ref=f_ref,
                                  f_lower=self.fmin)
@@ -170,7 +170,7 @@ class PPCatalogue(Catalogue):
         hp.times -= t0
         hx.times -= t0
 
-        tix = (time_range[0] < hp.times*1e4) & (hp.times*1e4 < time_range[1])
+        tix = (time_range[0] < hp.times) & (hp.times < time_range[1])
 
         hp.times = hp.times[tix]
         hx.times = hx.times[tix]
@@ -187,7 +187,9 @@ class NRCatalogue(Catalogue):
     """
 
     def __init__(self, origin="GeorgiaTech", ftype="hdf5",
-                 table=None, waveforms=None):
+                 table=None, waveforms=None,
+                 exclude_waveforms=[],
+    ):
         """
         Assemble a catalogue of numerical relativity waveforms.
 
@@ -197,6 +199,11 @@ class NRCatalogue(Catalogue):
            The source of the waveforms to build the catalogue from.
            At present this list is limited to a small number of NR
            simulation sources.
+
+        exclude_waveforms: list
+           A list of waveform tags to be excluded from the catalogue.
+           This might be useful if you're constructing a LOO test, for example.
+           By default this is an empty list.
 
         ftype: str
            The file type containing the waveforms.
@@ -210,6 +217,8 @@ class NRCatalogue(Catalogue):
 
         self.data_path = config.get("catalogues", origin)
 
+        self.excludes = {'waveforms': list(exclude_waveforms)}
+        
         if isinstance(waveforms, np.ndarray) \
            and isinstance(table, pd.DataFrame):
             self.table = table
@@ -249,6 +258,12 @@ class NRCatalogue(Catalogue):
 
         for nrfile in nr_files:
 
+            tag = nrfile.split("/")[-1].split(".")[0]
+
+            if tag in self.excludes['waveforms']:
+                print("Skipped waveform {}".format(tag))
+                continue
+            
             data = h5py.File(nrfile, 'r')
 
             try:
@@ -264,7 +279,7 @@ class NRCatalogue(Catalogue):
             total_mass = 60
             s1x, s1y, s1z, s2x, s2y, s2z = get_spin(0, total_mass, str(nrfile))
 
-            pars = [nrfile.split("/")[-1].split(".")[0],
+            pars = [tag,
                     mass_ratio, s1x, s1y, s1z, s2x, s2y, s2z,
                     Mflower]
 
@@ -480,7 +495,8 @@ class NRCatalogue(Catalogue):
                 continue
 
             #hp.times -= hp.times[np.argmax(hp.times)]
-            ixs = hp.times < tmax
+            #ixs = hp.times < tmax
+            ixs = (tmax > hp.times) & (hp.times > tmin)
 
             export = np.ones((len(hp.data[ixs][::skip]), 10))
 

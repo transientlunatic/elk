@@ -68,7 +68,7 @@ class PPCatalogue(Catalogue):
                                 8: "h+",
                                 9: "hx"}
         self.c_ind = {j: i for i, j in self.data_parameters.items()}
-        
+
     def create_training_data(self, total_mass, f_min=None, ma=None,
                              sample_rate=4096., distance=1, tmax=0.005, tmin=-0.010):
         """
@@ -82,7 +82,7 @@ class PPCatalogue(Catalogue):
            waveforms should be produced.
         f_min : float
            The minimum frequency which should be included
-           in the wavefom. By default this is the minimum frequency 
+           in the wavefom. By default this is the minimum frequency
            as calculated from the waveform metadata.
         sample_rate : float
            The sample rate at which the data should be generated.
@@ -118,8 +118,8 @@ class PPCatalogue(Catalogue):
 
             export = np.ones((len(hp.data[ixs][::skip]), 10))
 
-            
-            
+
+
             export[:, 0] = hp.times[ixs][::skip]
             export[:, 1] = waveform_p['mass ratio']
             # TODO Fix this
@@ -131,7 +131,7 @@ class PPCatalogue(Catalogue):
             big_export = np.vstack([big_export, export])
 
         return big_export[1:, :]
-        
+
     def waveform(self, p, time_range, distance=1.0, coa_phase=0, t0=0, f_ref=100):
         """
         Generate a single waveform from the catalogue.
@@ -143,7 +143,7 @@ class PPCatalogue(Catalogue):
 
         for par in self.parameters:
             if not par.replace("_", " ") in p: p[par.replace("_", " ")] = 0
-        
+
         hp, hx = get_td_waveform(approximant=self.approximant,
                                  mass1=mass1,
                                  mass2=mass2,
@@ -161,12 +161,12 @@ class PPCatalogue(Catalogue):
 
         hp = Timeseries(hp)
         hx = Timeseries(hx)
-        
+
         # Recenter the waveforms on the maximum strain
         hp.times -= hp.times[np.argmax(np.abs(hp.data - 1j * hx.data))]
         hx.times -= hx.times[np.argmax(np.abs(hp.data - 1j * hx.data))]
 
-        # Recenter the waveforms now to some arbitrary time 
+        # Recenter the waveforms now to some arbitrary time
         hp.times -= t0
         hx.times -= t0
 
@@ -218,7 +218,7 @@ class NRCatalogue(Catalogue):
         self.data_path = config.get("catalogues", origin)
 
         self.excludes = {'waveforms': list(exclude_waveforms)}
-        
+
         if isinstance(waveforms, np.ndarray) \
            and isinstance(table, pd.DataFrame):
             self.table = table
@@ -263,7 +263,7 @@ class NRCatalogue(Catalogue):
             if tag in self.excludes['waveforms']:
                 print("Skipped waveform {}".format(tag))
                 continue
-            
+
             data = h5py.File(nrfile, 'r')
 
             try:
@@ -271,7 +271,7 @@ class NRCatalogue(Catalogue):
             except KeyError:
                 print("Problem with waveform {}".format(nrfile))
 
-                
+
             Mflower = data.attrs['f_lower_at_1MSUN']
             mass_ratio = -(2*eta + np.sqrt(1-4*eta) - 1) / (2*eta)
 
@@ -316,7 +316,7 @@ class NRCatalogue(Catalogue):
            the waveforms where the s1x component is zero.
         """
         query_table = self.table.query(expression)
-        
+
         query_waveforms = np.array([waveform for waveform
                            in self.waveforms if waveform.tag
                            in query_table.tag.values])
@@ -380,7 +380,7 @@ class NRCatalogue(Catalogue):
                 'weight': 'light',
                 'size': 10,
         }
-        
+
         f = plt.figure(figsize=figsize)
 
         if not isinstance(additional, pd.DataFrame):
@@ -400,7 +400,7 @@ class NRCatalogue(Catalogue):
              legend_ax.scatter(0, i, marker="o", c=point[1]['color'], alpha=0.7)
              legend_ax.text(0.02, i, point[1]['label'], ha="left", va="center", fontdict=lato)
         legend_ax.set_xlim([-0.05, 0.3])
-             
+
         for i, parameter in enumerate(self.parameters):
             for j, j_parameter in enumerate(self.parameters):
 
@@ -421,7 +421,7 @@ class NRCatalogue(Catalogue):
                     ax.yaxis.tick_right()
                     ax.set_yticks(ax.get_yticks()[1:-1])
                 else:
-                    
+
                     # Add in the 'additional' points
                     ax.scatter(additional[parameter], additional[j_parameter], marker="o", c=additional['color'], alpha=0.7)
 
@@ -465,7 +465,7 @@ class NRCatalogue(Catalogue):
            waveforms should be produced.
         f_min : float
            The minimum frequency which should be included
-           in the wavefom. By default this is the minimum frequency 
+           in the wavefom. By default this is the minimum frequency
            as calculated from the waveform metadata.
         sample_rate : float
            The sample rate at which the data should be generated.
@@ -500,8 +500,8 @@ class NRCatalogue(Catalogue):
 
             export = np.ones((len(hp.data[ixs][::skip]), 10))
 
-            
-            
+
+
             export[:, 0] = hp.times[ixs][::skip]
             export[:, 1] = waveform.mass_ratio
             export[:, [2, 3, 4, 5, 6, 7]] *= waveform.spins

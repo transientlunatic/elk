@@ -82,7 +82,7 @@ class Timeseries(object):
            An array of data points.
         variance : array-like (optional)
            An array of variances.
-        times : array-like 
+        times : array-like
            An array of timestamps
         """
 
@@ -99,7 +99,7 @@ class Timeseries(object):
 
         if isinstance(variance, np.ndarray):
             self.variance = variance
-            
+
         self.df = 1./self.dt
 
     def pycbc(self):
@@ -255,7 +255,7 @@ class NRWaveform(Waveform):
             if t_max:
                 hp.data, hp.times = hp.data[hp.times < t_max], hp.times[hp.times < t_max]
                 hx.data, hx.times = hx.data[hx.times < t_max], hx.times[hx.times < t_max]
-                
+
             return hp, hx
 
         except RuntimeError:

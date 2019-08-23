@@ -32,6 +32,7 @@ project_root = os.path.dirname(cwd)
 sys.path.insert(0, project_root)
 
 import elk
+import sphinx_daniel_theme
 
 # -- General configuration ---------------------------------------------
 
@@ -55,7 +56,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Elk: A Waveform Catalogie Tool'
+project = u'Elk: A Waveform Catalogue Tool'
 copyright = u"2018, Daniel Williams"
 
 # The version info for the project you're documenting, acts as replacement
@@ -111,8 +112,8 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
-
+html_theme = 'daniel'
+html_theme_path = sphinx_daniel_theme.get_html_theme_path()
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
 # documentation.
@@ -209,7 +210,7 @@ latex_elements = {
 # [howto/manual]).
 latex_documents = [
     ('index', 'elk.tex',
-     u'Elk: A Waveform Catalogie Tool Documentation',
+     u'Elk: A Waveform Catalogue Tool Documentation',
      u'Daniel Williams', 'manual'),
 ]
 
@@ -240,7 +241,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'elk',
-     u'Elk: A Waveform Catalogie Tool Documentation',
+     u'Elk: A Waveform Catalogue Tool Documentation',
      [u'Daniel Williams'], 1)
 ]
 
@@ -255,7 +256,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'elk',
-     u'Elk: A Waveform Catalogie Tool Documentation',
+     u'Elk: A Waveform Catalogue Tool Documentation',
      u'Daniel Williams',
      'elk',
      'One line description of project.',

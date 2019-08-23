@@ -9,11 +9,10 @@ Elk: A Waveform Catalogue Tool
 .. image:: https://img.shields.io/travis/transientlunatic/elk.svg
         :target: https://travis-ci.org/transientlunatic/elk
 
-..
-
-   .. image:: https://readthedocs.org/projects/elk/badge/?version=latest
-	   :target: https://elk.readthedocs.io/en/latest/?badge=latest
-	   :alt: Documentation Status
+   ..
+      .. image:: https://readthedocs.org/projects/elk/badge/?version=latest
+	      :target: https://elk.readthedocs.io/en/latest/?badge=latest
+	      :alt: Documentation Status
 
    .. image:: https://pyup.io/repos/github/transientlunatic/elk/shield.svg
 	:target: https://pyup.io/repos/github/transientlunatic/elk/
@@ -21,10 +20,14 @@ Elk: A Waveform Catalogue Tool
 
 
 A Python package for managing and interacting with gravitational waveform catalogues.
+Elk was initially designed to make working with numerical relativity catalogues easier.
+These are normally distributed as directories full of HDF5 files, and can be a bit cumbersome to deal with.
+Elk browses the contents of these directories and can assemble a catalogue based on the files in it.
+	      
 
 
 * Free software: MIT license
-* Documentation: https://elk.readthedocs.io.
+* Documentation: https://code.daniel-williams.co.uk/elk/
 
 
 Features

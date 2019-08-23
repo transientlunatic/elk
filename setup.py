@@ -2,21 +2,14 @@
 
 from setuptools import setup
 
-import versioneer
-
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [
-    'Click>=6.0',
-    'numpy',
-    'pandas',
-    'lalsuite',
-    'pycbc'
-]
+with open("requirements.txt") as requires_file:
+    requirements = requires_file.read().split("\n")
 
 test_requirements = [
     # TODO: put package test requirements here
@@ -24,7 +17,8 @@ test_requirements = [
 
 setup(
     name='elk',
-    version=versioneer.get_version(),
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     description="""A Python package for managing and interacting with
 gravitational waveform catalogues.""",
     long_description=readme + '\n\n' + history,

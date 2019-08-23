@@ -8,7 +8,7 @@ Installation
 Stable release
 --------------
 
-To install Elk: A Waveform Catalogie Tool, run this command in your terminal:
+To install Elk, run this command in your terminal:
 
 .. code-block:: console
 
@@ -23,10 +23,10 @@ you through the process.
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
 
 
-From sources
-------------
+From source
+-----------
 
-The sources for Elk: A Waveform Catalogie Tool can be downloaded from the `Github repo`_.
+The source for Elk can be downloaded from the `Github repo`_.
 
 You can either clone the public repository:
 

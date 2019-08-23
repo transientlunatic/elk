@@ -38,8 +38,8 @@ and "help wanted" is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-Elk: A Waveform Catalogie Tool could always use more documentation, whether as part of the
-official Elk: A Waveform Catalogie Tool docs, in docstrings, or even on the web in blog posts,
+Elk  could always use more documentation, whether as part of the
+official Elk docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
 Submit Feedback

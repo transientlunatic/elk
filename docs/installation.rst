@@ -12,7 +12,7 @@ To install Elk, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install elk
+    $ pip install elk-waveform
 
 This is the preferred method to install Elk: A Waveform Catalogie Tool, as it will always install the most recent stable release.
 

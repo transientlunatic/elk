@@ -4,15 +4,15 @@ Elk: A Waveform Catalogue Tool
 
 
 .. image:: https://img.shields.io/pypi/v/elk.svg
-        :target: https://pypi.python.org/pypi/elk
+           :target: https://pypi.python.org/pypi/elk
 
 .. image:: https://img.shields.io/travis/transientlunatic/elk.svg
-        :target: https://travis-ci.org/transientlunatic/elk
+           :target: https://travis-ci.org/transientlunatic/elk
 
 
-   .. image:: https://pyup.io/repos/github/transientlunatic/elk/shield.svg
-	:target: https://pyup.io/repos/github/transientlunatic/elk/
-	:alt: Updates
+.. image:: https://pyup.io/repos/github/transientlunatic/elk/shield.svg
+	   :target: https://pyup.io/repos/github/transientlunatic/elk/
+	   :alt: Updates
 
 
 A Python package for managing and interacting with gravitational waveform catalogues.

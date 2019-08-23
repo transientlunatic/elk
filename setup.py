@@ -19,8 +19,7 @@ setup(
     name='elk-waveform',
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
-    description="""A Python package for managing and interacting with
-gravitational waveform catalogues.""",
+    description="""A Python package for managing and interacting with gravitational waveform catalogues.""",
     long_description=readme + '\n\n' + history,
     author="Daniel Williams",
     author_email='daniel.williams@ligo.org',

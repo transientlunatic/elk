@@ -2,13 +2,11 @@
 Elk: A Waveform Catalogue Tool
 ===============================
 
-
-.. image:: https://img.shields.io/pypi/v/elk.svg
-           :target: https://pypi.python.org/pypi/elk
+.. image:: https://badge.fury.io/py/elk-waveform.svg
+	   :target: https://badge.fury.io/py/elk-waveform
 
 .. image:: https://img.shields.io/travis/transientlunatic/elk.svg
            :target: https://travis-ci.org/transientlunatic/elk
-
 
 .. image:: https://pyup.io/repos/github/transientlunatic/elk/shield.svg
 	   :target: https://pyup.io/repos/github/transientlunatic/elk/

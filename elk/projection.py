@@ -6,12 +6,13 @@ This module contains code for projecting timeseries into alternative bases for d
 """
 
 from scipy.interpolate import LinearNDInterpolator
+import numpy as np
 class ProperBasis(object):
     """
     Construct and operate a proper orthogonal decomposition of a set of waveforms.
     """
     def __init__(self, locs,
-                 timeseries, bases=1, interpolator=LinearInterpolator):
+                 timeseries, bases=1, interpolator=LinearNDInterpolator):
         """
         Construct a properly orthogonalised basis representation of a set of training timeseries.
 
@@ -55,23 +56,22 @@ class ProperBasis(object):
         
         self.timeseries = np.array(timeseries)
         self.locs_array = np.array([np.array(list(loc.values())) for loc in locs])
-        
-        self.locs_array = self.locs_array[:,0]
+        self.locs_array = self.locs_array[:,:2]
         
         self.locs = locs
-        self.basis, self.coeffs = proper_decomposition(self.timeseries)
+        self.basis, self.coeffs = self.proper_decomposition()
         
-        self.basis = self.basis[:bases]
-        self.coeffs = self.coeffs[:bases]
-        
-        self._interpolator = interpolator(self.locs_array, self.coeffs.T)
+        self.basis = self.basis[:,:bases]
+        self.coeffs = self.coeffs[:,:bases]
+
+        self._interpolator = interpolator(np.atleast_2d(self.locs_array), self.coeffs.T)
         
     def __call__(self, p):
         """
         Produce a waveform
         """
         
-        return np.dot(self.interpolated_coefficients(p), self.basis).T
+        return np.dot(self.basis, self.interpolated_coefficients(p).T)
         
     def interpolated_coefficients(self, p):
         """
@@ -84,9 +84,9 @@ class ProperBasis(object):
         Calculate the proper orthogonal decomposition of a set of waveforms.
         """
 
-        u, s, vh = np.linalg.svd(self.timeseries, full_matrices=False)
+        u, s, vh = np.linalg.svd(self.timeseries.T, full_matrices=False)
         basis = u
-        coefficiencts = basis.T.dot(self.timeseries)
+        coefficiencts = basis.T.dot(self.timeseries.T)
 
         return basis, coefficiencts
     

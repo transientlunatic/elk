@@ -56,7 +56,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Elk: A Waveform Catalogue Tool'
+project = u'Elk'
 copyright = u"2018, Daniel Williams"
 
 # The version info for the project you're documenting, acts as replacement
@@ -210,7 +210,7 @@ latex_elements = {
 # [howto/manual]).
 latex_documents = [
     ('index', 'elk.tex',
-     u'Elk: A Waveform Catalogue Tool Documentation',
+     u'Elk Documentation',
      u'Daniel Williams', 'manual'),
 ]
 
@@ -241,7 +241,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'elk',
-     u'Elk: A Waveform Catalogue Tool Documentation',
+     u'Elk Documentation',
      [u'Daniel Williams'], 1)
 ]
 
@@ -256,7 +256,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'elk',
-     u'Elk: A Waveform Catalogue Tool Documentation',
+     u'Elk Documentation',
      u'Daniel Williams',
      'elk',
      'One line description of project.',

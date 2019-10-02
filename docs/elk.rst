@@ -36,6 +36,14 @@ elk.exceptions module
    :undoc-members:
    :show-inheritance:
 
+elk.projection module
+---------------------
+
+.. automodule:: elk.projection
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 elk.waveform module
 -------------------
 

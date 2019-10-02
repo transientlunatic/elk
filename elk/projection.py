@@ -5,16 +5,19 @@ Elk projection
 This module contains code for projecting timeseries into alternative bases for dimensionality and order reduction.
 """
 
-from scipy.interpolate import LinearNDInterpolator
+from scipy.interpolate import LinearNDInterpolator, interp1d
 import numpy as np
+import json
+
 class ProperBasis(object):
     """
     Construct and operate a proper orthogonal decomposition of a set of waveforms.
     """
     def __init__(self, locs,
-                 timeseries, bases=1, interpolator=LinearNDInterpolator):
-        """
-        Construct a properly orthogonalised basis representation of a set of training timeseries.
+                 timeseries, times=None, bases=1, interpolator=LinearNDInterpolator):
+        """Construct a properly orthogonalised basis representation of a set of training timeseries.
+
+        .. warning:: This class is very much still under development, and you should use it at your peril (well, with caution that its interface will change).
 
         Parameters
         ----------
@@ -23,6 +26,8 @@ class ProperBasis(object):
            training timeseries.
         timeseries : `ndarray`
            An array of training timeseries.
+        times: `ndarray`
+           The times corresponding to each basis vector.
         bases : int
            The number of bases which should be used to produce the new basis.
         interpolator : function
@@ -30,7 +35,6 @@ class ProperBasis(object):
 
         Examples
         --------
-
         >>> waveforms = PPCatalogue(approximant="IMRPhenomPv2", 
                                     total_mass=20, 
                                     fmin=30, 
@@ -45,18 +49,18 @@ class ProperBasis(object):
         >>> data = np.array([waveforms.waveform(p=waveform_p, 
                                     time_range=time_range)[0].data 
                  for waveform_p in waveforms.waveforms])
-        >>> basis = ProperBasis(locs = waveforms.waveforms, 
-                    timeseries = data.T, 
-                    bases = 2)
+        >>> locs = np.array([np.array(list(waveform.values())) for waveform in waveforms.waveforms])
+        >>> basis = ProperBasis(locs = locs[:,0], 
+                    timeseries = data, 
+                    bases = 20)
         >>> basis(0.5)
-        array([ 5.34402492e-20, -2.85781392e-20, -1.04712322e-19,  2.51580757e-20,
-       -5.75478506e-21, -3.52799281e-20,  1.41297522e-20, -2.98353891e-20,
-        1.94312058e-20, -7.85569366e-21])
+        array([-1.89929950e-20,  1.66736553e-20, -7.28592335e-21,  1.14458442e-21,
+       -3.13984587e-21,  1.13517145e-20, -1.98235910e-20,  2.25379863e-20,
+        -1.60227815e-20,  5.26962113e-22])
         """
         
         self.timeseries = np.array(timeseries)
-        self.locs_array = np.array([np.array(list(loc.values())) for loc in locs])
-        self.locs_array = self.locs_array[:,:2]
+        self.locs_array = locs #
         
         self.locs = locs
         self.basis, self.coeffs = self.proper_decomposition()
@@ -64,11 +68,21 @@ class ProperBasis(object):
         self.basis = self.basis[:,:bases]
         self.coeffs = self.coeffs[:,:bases]
 
-        self._interpolator = interpolator(np.atleast_2d(self.locs_array), self.coeffs.T)
+        self.times = times
+
+        # TODO Fix this up properly
+        if self.locs_array.ndim == 1:
+            self._interpolator = interp1d(self.locs_array, self.coeffs)
+        else: 
+            self._interpolator = interpolator(self.locs_array, self.coeffs.T)
         
     def __call__(self, p):
-        """
-        Produce a waveform
+        """Produce a waveform
+
+        Parameters
+        ----------
+        p : `ndarray`-like
+           An array describing the parameters for the new waveform.
         """
         
         return np.dot(self.basis, self.interpolated_coefficients(p).T)
@@ -89,6 +103,10 @@ class ProperBasis(object):
         coefficiencts = basis.T.dot(self.timeseries.T)
 
         return basis, coefficiencts
-    
-    def determine_mapping(self):
-        pass
+
+    def save(self, filename):
+        """Save the basis to a machine-readable file."""
+        data = dict(vectors = self.basis.tolist(), abscissa = self.times.tolist(), coefficients = self.coeffs.tolist(), locations = self.locs.tolist())
+
+        with open("{}.json".format(filename), "w") as fp:
+            json.dump(data, fp)

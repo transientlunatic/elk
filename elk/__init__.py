@@ -11,14 +11,13 @@ try:
     __version__ = get_distribution(__name__).version
 except DistributionNotFound:
     # package is not installed
+    __version__ = "dev"
     pass
 
 try:
     import ConfigParser as configparser
 except ImportError:
     import configparser
-
-import os
 
 default_config = resource_string(__name__, '{}.conf'.format(__packagename__))
 

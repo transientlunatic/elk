@@ -65,15 +65,17 @@ class ProperBasis(object):
         self.locs = locs
         self.basis, self.coeffs = self.proper_decomposition()
         
-        self.basis = self.basis[:,:bases]
-        self.coeffs = self.coeffs[:,:bases]
+        self.basis = self.basis#[:,:bases]
+        self.coeffs = self.coeffs#[:,:bases]
 
         self.times = times
 
         # TODO Fix this up properly
         if self.locs_array.ndim == 1:
             self._interpolator = interp1d(self.locs_array, self.coeffs)
-        else: 
+        else:
+            print(self.locs_array.shape)
+            print(self.coeffs.shape)
             self._interpolator = interpolator(self.locs_array, self.coeffs.T)
         
     def __call__(self, p):
@@ -100,13 +102,13 @@ class ProperBasis(object):
 
         u, s, vh = np.linalg.svd(self.timeseries.T, full_matrices=False)
         basis = u
-        coefficiencts = basis.T.dot(self.timeseries.T)
+        coefficiencts = basis.dot(self.timeseries)
 
         return basis, coefficiencts
 
     def save(self, filename):
         """Save the basis to a machine-readable file."""
-        data = dict(vectors = self.basis.tolist(), abscissa = self.times.tolist(), coefficients = self.coeffs.tolist(), locations = self.locs.tolist())
+        data = dict(vectors = self.basis.tolist(), abscissa = self.times.tolist(), coefficients = self.coeffs.T.tolist(), locations = self.locs.tolist())
 
         with open("{}.json".format(filename), "w") as fp:
             json.dump(data, fp)

@@ -59,9 +59,23 @@ def components_from_total(total_mass, mass_ratio):
 
 class FrequencySeries(object):
     """
-    A class to represent a frequency series (spectrum)
+    Represents a frequency series (spectrum)
     """
-    pass
+
+    def __init__(self, data, frequencies=None, variance=None):
+        """Create a frequency series object from a LALSuite frequency series or from data and frequencies.
+
+        Optionally a variance frequency array can be provided.
+
+        Parameters
+        ----------
+        data : {array-like, pycbc freqseries}
+           An array of data points.
+        variance : array-like (optional)
+           An array of variances.
+        times : array-like
+           An array of frequency labels.
+        """
 
 
 class Timeseries(object):
@@ -102,6 +116,21 @@ class Timeseries(object):
 
         self.df = 1./self.dt
 
+    def __getitem__(self, key):
+        """
+        Return the mean values of the waveform, to make the waveform object behave as if it's in fact an array.
+        """
+        return self.data[key]
+
+    def __mul__(self, other):
+        """
+        Multiply the components of the timeseries by a suitable value or set of values.
+        """
+        self.data *= other
+        if self.variance:
+            self.variance *= other
+        return self
+        
     def pycbc(self):
         """
         Return the timeseries as a pycbc timeseries.
@@ -145,6 +174,7 @@ class Timeseries(object):
 
 
 class Waveform(object):
+    
     pass
 
 
